@@ -15,16 +15,11 @@ logger.setLevel(logging.INFO)
 def get_records(domain, record_type):
     answers = query(domain, record_type)
     print(f'DNS query for: {answers.qname}')
-    '''
-    Below works for TXT records only. Should search through `answers` for a better result.
-    '''
-    for rdata in answers:
-        for responses in rdata.strings:
-            try:
-                print(f'{record_type}: {responses}')
-            except Exception as e:
-                logger.exception(e)
-                logger.info(f"Could not find record type: {record_type}")
+    try:
+        print(f'{answers.rrset.__str__()}')
+    except Exception as e:
+        logger.exception(e)
+        logger.info(e)
 
 
 def main():
