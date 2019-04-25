@@ -3,23 +3,24 @@
 TODO: module docstring
 """
 
-import logging
+# import logging
 import argparse
+from sys import exit
 from dns.resolver import query
+from dns.resolver import NoAnswer
+from dns.rdatatype import UnknownRdatatype
 
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+class APIError(ValueError):
+    pass
 
 
 def get_records(domain, record_type):
-    answers = query(domain, record_type)
-    print(f'DNS query for: {answers.qname}')
     try:
+        answers = query(domain, record_type)
         print(f'{answers.rrset.__str__()}')
-    except Exception as e:
-        logger.exception(e)
-        logger.info(e)
+    except (NoAnswer, UnknownRdatatype) as e:
+        raise APIError() from e
 
 
 def main():
@@ -30,8 +31,15 @@ def main():
     parser.add_argument('domain')
     parser.add_argument('record_type')
     args = parser.parse_args()
-    get_records(args.domain, args.record_type)
+    try:
+        get_records(args.domain, args.record_type)
+    except APIError as e:
+        exit(e.__cause__)
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except Exception as e:
+        from pdb import post_mortem
+        post_mortem()
