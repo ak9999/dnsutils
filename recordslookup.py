@@ -3,11 +3,10 @@
 TODO: module docstring
 """
 
-# import logging
 import argparse
 from sys import exit
 from dns.resolver import query
-from dns.resolver import NoAnswer
+from dns.resolver import NoAnswer, NoNameservers
 from dns.rdatatype import UnknownRdatatype
 
 
@@ -19,7 +18,7 @@ def get_records(domain, record_type):
     try:
         answers = query(domain, record_type)
         print(f'{answers.rrset.__str__()}')
-    except (NoAnswer, UnknownRdatatype) as e:
+    except (NoAnswer, UnknownRdatatype, NoNameservers) as e:
         raise APIError() from e
 
 
