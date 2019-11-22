@@ -12,19 +12,20 @@ class APIError(ValueError):
 
 
 def get_records(arguments):
-    domain, record_type = arguments.domain, arguments.record_type
+    domain = arguments.domain
     resolver = dns.resolver.Resolver()
     if arguments.nameservers:
         resolver = dns.resolver.Resolver(configure=False)
         resolver.nameservers = arguments.nameservers
     try:
-        if record_type == 'dmarc'.lower():
+        if not arguments.record:
+            answers = resolver.query(domain)
+        elif arguments.record == 'dmarc'.lower():
             target = f'_dmarc.{domain.lower()}'
             answers = resolver.query(target, 'TXT')
-            print(f'{answers.rrset.__str__()}')
         else:
             answers = resolver.query(domain, record_type)
-            print(f'{answers.rrset.__str__()}')
+        print(f'{answers.rrset.__str__()}')
     except (NoAnswer, UnknownRdatatype, NoNameservers) as e:
         raise APIError() from e
 
@@ -35,7 +36,7 @@ def main():
         description='Pull DNS records for a given domain',
     )
     parser.add_argument('domain', help='domain name to look up')
-    parser.add_argument('record_type', help='record type to look up: \'A\', \'MX\', etc.')
+    parser.add_argument('--record', help='record type to look up: \'A\', \'MX\', etc.')
     parser.add_argument('--nameservers', nargs='+', help='nameservers used to query records')
     args = parser.parse_args()
     try:
