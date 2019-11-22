@@ -14,7 +14,7 @@ class APIError(ValueError):
 def get_records(arguments):
     domain, record_type = arguments.domain, arguments.record_type
     resolver = dns.resolver.Resolver()
-    if arguments.nameserver:
+    if arguments.nameservers:
         resolver = dns.resolver.Resolver(configure=False)
         resolver.nameservers = arguments.nameservers
     try:
@@ -36,7 +36,7 @@ def main():
     )
     parser.add_argument('domain', help='domain name to look up')
     parser.add_argument('record_type', help='record type to look up: \'A\', \'MX\', etc.')
-    parser.add_argument('--nameservers', help='nameserver used to query records', type=list)
+    parser.add_argument('--nameservers', nargs='+', help='nameservers used to query records')
     args = parser.parse_args()
     try:
         get_records(args)
@@ -48,6 +48,6 @@ if __name__ == '__main__':
     try:
         main()
     except Exception as e:
-        from pdb import post_mortem
-        post_mortem()
+        # from pdb import post_mortem
+        # post_mortem()
         print(f'Error: {e}')
