@@ -11,20 +11,19 @@ class APIError(ValueError):
     pass
 
 
-def get_records(arguments):
-    domain = arguments.domain
+def get_records(args):
     resolver = dns.resolver.Resolver()
-    if arguments.nameservers:
+    if args.nameservers:
         resolver = dns.resolver.Resolver(configure=False)
-        resolver.nameservers = arguments.nameservers
+        resolver.nameservers = args.nameservers
     try:
-        if not arguments.record:
-            answers = resolver.query(domain)
-        elif arguments.record == 'dmarc'.lower():
-            target = f'_dmarc.{domain.lower()}'
+        if not args.record:
+            answers = resolver.query(args.domain)
+        elif args.record == 'dmarc'.lower():
+            target = f'_dmarc.{args.domain.lower()}'
             answers = resolver.query(target, 'TXT')
         else:
-            answers = resolver.query(domain, record_type)
+            answers = resolver.query(args.domain, args.record)
         print(f'{answers.rrset.__str__()}')
     except (NoAnswer, UnknownRdatatype, NoNameservers) as e:
         raise APIError() from e
