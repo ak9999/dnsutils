@@ -1,7 +1,8 @@
-#!/usr/bin/env python3  
+#!/usr/bin/env python3
 
 import argparse
 from sys import exit
+from typing import Any
 import dns.resolver
 from dns.resolver import NoAnswer, NoNameservers, NXDOMAIN  # exceptions
 from dns.rdatatype import UnknownRdatatype                  # exceptions
@@ -11,25 +12,25 @@ class APIError(ValueError):
     pass
 
 
-def get_records(args):
+def get_records(args: argparse.Namespace) -> None:
     resolver = dns.resolver.Resolver()
     if args.nameservers:
         resolver = dns.resolver.Resolver(configure=False)
         resolver.nameservers = args.nameservers
     try:
         if not args.record:
-            answers = resolver.query(args.domain)
+            answers = resolver.resolve(args.domain)
         elif args.record == 'dmarc'.lower():
             target = f'_dmarc.{args.domain.lower()}'
-            answers = resolver.query(target, 'TXT')
+            answers = resolver.resolve(target, 'TXT')
         else:
-            answers = resolver.query(args.domain, args.record)
+            answers = resolver.resolve(args.domain, args.record)
         print(f'{answers.rrset.__str__()}')
     except (NoAnswer, UnknownRdatatype, NoNameservers) as e:
         raise APIError() from e
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         prog='dnslookup',
         description='Pull DNS records for a given domain',
