@@ -5,8 +5,10 @@ from __future__ import annotations
 import argparse
 import logging
 import sys
-from typing import Iterator
+from typing import Iterator, cast
 from unittest import mock
+
+import dns.resolver
 
 import pytest
 from dns.exception import Timeout
@@ -208,7 +210,7 @@ def test_find_dkim_record_success() -> None:
         "another txt",
     ]
     mock_answer = MockAnswer(records)
-    result = _find_dkim_record(mock_answer)  # type: ignore[arg-type]
+    result = _find_dkim_record(cast(dns.resolver.Answer, mock_answer))
     assert result == "v=DKIM1; k=rsa; p=MIGfMA0GCSq..."
 
 
@@ -216,7 +218,7 @@ def test_find_dkim_record_not_found() -> None:
     """Test that missing DKIM record raises error."""
     mock_answer = MockAnswer(records=["other txt record"])
     with pytest.raises(DKIMRecordNotFoundError):
-        _find_dkim_record(mock_answer)  # type: ignore[arg-type]
+        _find_dkim_record(cast(dns.resolver.Answer, mock_answer))
 
 
 # Tests for main()
