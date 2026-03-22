@@ -3,13 +3,9 @@ name = "dnsutils"
 version = "0.1.0"
 description = "Utilities for retrieving DNS records or working with the DNS protocol"
 readme = "README.md"
-authors = [
-    { name = "ak9999", email = "abdullah@ajkhan.me" }
-]
+authors = [{ name = "ak9999", email = "abdullah@ajkhan.me" }]
 requires-python = ">=3.13"
-dependencies = [
-    "dnspython>=2.6.1",
-]
+dependencies = ["dnspython>=2.6.1"]
 
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -21,14 +17,34 @@ classifiers = [
     "Topic :: System :: Networking",
 ]
 
-[project.optional-dependencies]
-dev = [
-    "build",
-]
-
 [project.scripts]
 dnsutils = "dnsutils:main"
+spf = "dnsutils.spf:main"
+dkim = "dnsutils.dkim:main"
+dmarc = "dnsutils.dmarc:main"
 
 [build-system]
 requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.coverage.run]
+branch = true
+
+[tool.coverage.report]
+fail_under = 90
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short --cov=src/dnsutils --cov-report=term-missing:skip-covered"
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+
+[dependency-groups]
+dev = ["pytest>=9.0.2", "pytest-cov>=7.1.0", "ruff>=0.15.7", "ty>=0.0.24"]
